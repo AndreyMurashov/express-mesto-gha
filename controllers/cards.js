@@ -46,11 +46,16 @@ module.exports.likeCard = async (req, res) => {
     const data = await Card.findByIdAndUpdate(
       req.params.cardId,
       { $addToSet: { likes: req.user._id } },
-      { new: true });
+      { new: true },
+    );
     const owner = req.user._id;
-    const {
-      likes, _id, name, link, createdAt} = data;
-    res.status(200).json({ likes, _id, name, link, owner, createdAt });
+    const
+      {
+        likes, _id, name, link, createdAt,
+      } = data;
+    res.status(200).json({
+      likes, _id, name, link, owner, createdAt,
+    });
   } catch (err) {
     if (err.name === 'ValidationError') {
       res.status(400).send({
@@ -74,11 +79,15 @@ module.exports.dislikeCard = async (req, res) => {
     const data = await Card.findByIdAndUpdate(
       req.params.cardId,
       { $pull: { likes: req.user._id } },
-      { new: true }
+      { new: true },
     );
     const owner = req.user._id;
-    const { likes, _id, name, link, createdAt } = data;
-    res.status(200).json({ likes, _id, name, link, owner, createdAt });
+    const {
+      likes, _id, name, link, createdAt,
+    } = data;
+    res.status(200).json({
+      likes, _id, name, link, owner, createdAt,
+    });
   } catch (err) {
     if (err.name === 'ValidationError') {
       res.status(400).send({

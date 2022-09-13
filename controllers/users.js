@@ -16,8 +16,12 @@ const getUsers = async (req, res) => {
 const getOneUser = async (req, res) => {
   try {
     const data = await User.findById(req.params.userId);
-    const { name, about, avatar, _id } = data;
-    res.status(200).json({ name, about, avatar, _id });
+    const {
+      name, about, avatar, _id,
+    } = data;
+    res.status(200).json({
+      name, about, avatar, _id,
+    });
   } catch (err) {
     if (err.name === 'CastError') {
       res.status(404).send({
@@ -25,9 +29,9 @@ const getOneUser = async (req, res) => {
       });
       return;
     } else {
-    res.status(500).send({ message: 'Ошибка по умолчанию' });
+      res.status(500).send({ message: 'Ошибка по умолчанию' });
+    }
   }
-}
 };
 
 // создаёт пользователя
@@ -36,7 +40,9 @@ const createUser = async (req, res) => {
     const { name, about, avatar } = req.body;
     const data = await User.create({ name, about, avatar });
     const { _id } = data;
-    res.status(200).json({ name, about, avatar, _id });
+    res.status(200).json({
+      name, about, avatar, _id,
+    });
   } catch (err) {
     if (err.name === 'ValidationError') {
       res.status(400).send({
@@ -52,7 +58,7 @@ const createUser = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const { name, about } = req.body;
-    const data = await User.findByIdAndUpdate(req.user._id, {
+    await User.findByIdAndUpdate(req.user._id, {
       name,
       about,
     });
@@ -80,7 +86,7 @@ const updateUser = async (req, res) => {
 const updateAvatar = async (req, res) => {
   try {
     const { avatar } = req.body;
-    const data = await User.findByIdAndUpdate(req.user._id, {
+    await User.findByIdAndUpdate(req.user._id, {
       avatar,
     });
     res.status(200).json({ avatar });

@@ -66,14 +66,18 @@ const createUser = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const { name, about } = req.body;
-    await User.findByIdAndUpdate(req.user._id, {
-      name,
-      about,
-    });
-    res.status(200).json({ name, about });
+    const val = (name.length > 2 && name.length < 30 && about.length > 2 && about.length < 30);
+    if (val) {
+      await User.findByIdAndUpdate(req.user._id, {
+        name,
+        about,
+      });
+      res.status(200).json({ name, about });
+    } else {
+      throw new Error('Некорректные данные');
+    }
   } catch (err) {
-    console.log(err.name);
-    if (err.name === 'ValidationError') {
+    if (err.name === 'Error') {
       res.status(400).send({
         message: 'Переданы некорректные данные при обновлении профиля',
       });

@@ -66,7 +66,7 @@ const createUser = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const { name, about } = req.body;
-    const val = (name.length > 2 && name.length < 30 && about.length > 2 && about.length < 30);
+    const val = (name.length > 1 && name.length < 30 && about.length > 1 && about.length < 30);
     if (val) {
       await User.findByIdAndUpdate(req.user._id, {
         name,

@@ -41,7 +41,6 @@ module.exports.removeCard = async (req, res) => {
         .then(() => {
           res.status(200).send({ message: 'Карточка удалена' });
         }));
-    // res.status(200).send({ message: 'Карточка удалена' });
   } catch (err) {
     console.log(err.name);
     if (err.name === 'CastError') {

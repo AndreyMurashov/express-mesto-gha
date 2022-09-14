@@ -71,13 +71,15 @@ const updateUser = async (req, res) => {
       await User.findByIdAndUpdate(req.user._id, {
         name,
         about,
-      });
-      res.status(200).json({ name, about });
+      }).orFail(() => {})
+        .then(() => {
+          res.status(200).json({ name, about });
+        });
     } else {
       throw new Error('Некорректные данные');
     }
   } catch (err) {
-    if (err.name === 'Error') {
+    if (err.message === 'Некорректные данные') {
       res.status(400).send({
         message: 'Переданы некорректные данные при обновлении профиля',
       });

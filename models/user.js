@@ -5,13 +5,13 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     minlength: [2, 'Слишком коротко'],
-    maxlength: [30, 'Слишком длинная'],
+    maxlength: [30, 'Слишком длинно'],
   },
   about: {
     type: String,
     required: true,
-    minlength: 2,
-    maxlength: 30,
+    minlength: [2, 'Слишком коротко'],
+    maxlength: [30, 'Слишком длинно'],
   },
   avatar: {
     type: String,

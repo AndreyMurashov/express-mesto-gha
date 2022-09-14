@@ -67,24 +67,20 @@ const updateUser = async (req, res) => {
   try {
     const { name, about } = req.body;
     const val = (name.length > 1 && name.length < 30 && about.length > 1 && about.length < 30);
-    if (val) {
-      await User.findByIdAndUpdate(req.user._id, {
-        name,
-        about,
-      }).orFail(() => {})
-        .then(() => {
-          res.status(200).json({ name, about });
-        });
-    } else {
-      throw new Error('Некорректные данные');
-    }
-  } catch (err) {
-    if (err.message === 'Некорректные данные') {
+    if (!val) {
       res.status(400).send({
         message: 'Переданы некорректные данные при обновлении профиля',
       });
       return;
-    } else if (err.name === 'CastError') {
+    } else {
+      await User.findByIdAndUpdate(req.user._id, {
+        name,
+        about,
+      });
+      res.status(200).json({ name, about });
+    }
+  } catch (err) {
+    if (err.name === 'CastError') {
       console.log(err.name);
       res.status(404).send({
         message: 'Пользователь с указанным _id не найден',

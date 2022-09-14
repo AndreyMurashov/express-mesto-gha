@@ -23,9 +23,16 @@ const getOneUser = async (req, res) => {
       name, about, avatar, _id,
     });
   } catch (err) {
+    console.log(err.name);
     if (err.name === 'CastError') {
-      // не совпадают требования проекта и автотестов - пришлось указывать код 400, чтобы прошел
+      // не совпадают требования проекта и автотестов
+      // по проекту ошибка 400 в этом месте не требуется
       res.status(400).send({
+        message: 'Ошибочный запрос',
+      });
+      return;
+    } else if (err.name === 'TypeError') {
+      res.status(404).send({
         message: 'Пользователь по указанному _id не найден',
       });
       return;

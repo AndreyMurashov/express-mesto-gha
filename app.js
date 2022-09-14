@@ -6,6 +6,12 @@ const cardRouter = require('./routes/cards');
 const app = express();
 const { PORT = 3000 } = process.env;
 
+const absentisPage = (req, res) => {
+  res.status(404).send({
+    message: 'Страница не найдена',
+  });
+};
+
 app.use(express.json());
 
 app.use((req, res, next) => {
@@ -18,6 +24,11 @@ app.use((req, res, next) => {
 
 app.use(userRouter);
 app.use(cardRouter);
+app.get('*', absentisPage);
+app.put('*', absentisPage);
+app.post('*', absentisPage);
+app.patch('*', absentisPage);
+app.delete('*', absentisPage);
 
 mongoose
   .connect('mongodb://localhost:27017/mestodb', {

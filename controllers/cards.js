@@ -34,10 +34,30 @@ module.exports.createCard = async (req, res) => {
 };
 
 // удаляет карточку по идентификатору
-module.exports.removeCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.cardId)
-    .then(() => res.send({ message: 'Карточка удалена' }))
-    .catch(() => res.status(404).send({ message: 'Карточка с указанным _id не найдена' }));
+module.exports.removeCard = async (req, res) => {
+  try {
+    await Card.findById(req.params.cardId).orFail(() => {})
+      .then((card) => Card.deleteOne(card)
+        .then(() => {
+          res.status(200).send({ message: 'Карточка удалена' });
+        }));
+    // res.status(200).send({ message: 'Карточка удалена' });
+  } catch (err) {
+    console.log(err.name);
+    if (err.name === 'CastError') {
+      res.status(400).send({
+        message: 'Переданы некорректные данные',
+      });
+      return;
+    } else if (err.name === 'DocumentNotFoundError') {
+      res.status(404).send({
+        message: 'Карточка с указанным _id не найдена',
+      });
+      return;
+    } else {
+      res.status(500).send({ message: 'Ошибка по умолчанию' });
+    }
+  }
 };
 
 // поставить лайк карточке
@@ -57,12 +77,12 @@ module.exports.likeCard = async (req, res) => {
       likes, _id, name, link, owner, createdAt,
     });
   } catch (err) {
-    if (err.name === 'ValidationError') {
+    if (err.name === 'CastError') {
       res.status(400).send({
         message: 'Переданы некорректные данные для постановки/снятии лайка',
       });
       return;
-    } else if (err.name === 'CastError') {
+    } else if (err.name === 'TypeError') {
       res.status(404).send({
         message: 'Передан несуществующий _id карточки',
       });
@@ -89,12 +109,12 @@ module.exports.dislikeCard = async (req, res) => {
       likes, _id, name, link, owner, createdAt,
     });
   } catch (err) {
-    if (err.name === 'ValidationError') {
+    if (err.name === 'CastError') {
       res.status(400).send({
         message: 'Переданы некорректные данные для постановки/снятии лайка',
       });
       return;
-    } else if (err.name === 'CastError') {
+    } else if (err.name === 'TypeError') {
       res.status(404).send({
         message: 'Передан несуществующий _id карточки',
       });

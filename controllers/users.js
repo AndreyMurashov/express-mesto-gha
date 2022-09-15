@@ -73,8 +73,8 @@ const updateUser = async (req, res) => {
       await User.findByIdAndUpdate(req.user._id, {
         name,
         about,
-      }).then((user) => {
-        res.status(200).send(user);
+      }).then(() => {
+        res.status(200).send({ name, about });
       });
     }
   } catch (err) {

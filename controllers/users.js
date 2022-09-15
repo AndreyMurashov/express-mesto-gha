@@ -25,8 +25,6 @@ const getOneUser = async (req, res) => {
   } catch (err) {
     console.log(err.name);
     if (err.name === 'CastError') {
-      // не совпадают требования проекта и автотестов
-      // по проекту ошибка 400 в этом месте не требуется
       res.status(400).send({
         message: 'Ошибочный запрос',
       });
@@ -66,7 +64,7 @@ const createUser = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const { name, about } = req.body;
-    const val = (name.length > 1 && name.length < 30 && about.length > 1 && about.length < 30);
+    const val = (name.length > 1 && name.length < 31 && about.length > 1 && about.length < 31);
     if (!val) {
       res.status(400).send({
         message: 'Переданы некорректные данные при обновлении профиля',
@@ -76,8 +74,9 @@ const updateUser = async (req, res) => {
       await User.findByIdAndUpdate(req.user._id, {
         name,
         about,
+      }).then(() => {
+        res.status(200).send({ name, about });
       });
-      res.status(200).json({ name, about });
     }
   } catch (err) {
     if (err.name === 'CastError') {

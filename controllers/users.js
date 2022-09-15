@@ -73,8 +73,8 @@ const updateUser = async (req, res) => {
       await User.findByIdAndUpdate(req.user._id, {
         name,
         about,
-      }).then(() => {
-        res.status(200).send({ name, about });
+      }).then((user) => {
+        res.status(200).send(user);
       });
     }
   } catch (err) {
@@ -85,7 +85,7 @@ const updateUser = async (req, res) => {
       });
       return;
     } else {
-      res.status(500).send({ message: 'Ошибка по умолчанию' });
+      res.status(400).send({ message: 'Ошибка по умолчанию' });
     }
   }
 };

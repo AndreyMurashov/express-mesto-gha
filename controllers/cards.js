@@ -67,23 +67,25 @@ module.exports.likeCard = async (req, res) => {
       { $addToSet: { likes: req.user._id } },
       { new: true },
     );
-    const owner = req.user._id;
-    const
-      {
-        likes, _id, name, link, createdAt,
-      } = data;
-    res.status(200).json({
-      likes, _id, name, link, owner, createdAt,
-    });
+    if (!data) {
+      res.status(404).send({
+        message: 'Передан несуществующий _id карточки',
+      });
+      return;
+    } else {
+      const owner = req.user._id;
+      const
+        {
+          likes, _id, name, link, createdAt,
+        } = data;
+      res.status(200).json({
+        likes, _id, name, link, owner, createdAt,
+      });
+    }
   } catch (err) {
     if (err.name === 'CastError') {
       res.status(400).send({
         message: 'Переданы некорректные данные для постановки/снятии лайка',
-      });
-      return;
-    } else if (err.name === 'TypeError') {
-      res.status(404).send({
-        message: 'Передан несуществующий _id карточки',
       });
       return;
     } else {
@@ -100,22 +102,25 @@ module.exports.dislikeCard = async (req, res) => {
       { $pull: { likes: req.user._id } },
       { new: true },
     );
-    const owner = req.user._id;
-    const {
-      likes, _id, name, link, createdAt,
-    } = data;
-    res.status(200).json({
-      likes, _id, name, link, owner, createdAt,
-    });
+    if (!data) {
+      res.status(404).send({
+        message: 'Передан несуществующий _id карточки',
+      });
+      return;
+    } else {
+      const owner = req.user._id;
+      const {
+        likes, _id, name, link, createdAt,
+      } = data;
+      res.status(200).json({
+        likes, _id, name, link, owner, createdAt,
+      });
+    }
   } catch (err) {
+    console.log(err.name);
     if (err.name === 'CastError') {
       res.status(400).send({
         message: 'Переданы некорректные данные для постановки/снятии лайка',
-      });
-      return;
-    } else if (err.name === 'TypeError') {
-      res.status(404).send({
-        message: 'Передан несуществующий _id карточки',
       });
       return;
     } else {

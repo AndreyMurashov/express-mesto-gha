@@ -16,22 +16,23 @@ const getUsers = async (req, res) => {
 const getOneUser = async (req, res) => {
   try {
     const data = await User.findById(req.params.userId);
-    const {
-      name, about, avatar, _id,
-    } = data;
-    res.status(200).json({
-      name, about, avatar, _id,
-    });
+    if (!data) {
+      res.status(404).send({
+        message: 'Пользователь не найден',
+      });
+      return;
+    } else {
+      const {
+        name, about, avatar, _id,
+      } = data;
+      res.status(200).json({
+        name, about, avatar, _id,
+      });
+    }
   } catch (err) {
-    console.log(err.name);
     if (err.name === 'CastError') {
       res.status(400).send({
         message: 'Ошибочный запрос',
-      });
-      return;
-    } else if (err.name === 'TypeError') {
-      res.status(404).send({
-        message: 'Пользователь по указанному _id не найден',
       });
       return;
     } else {
@@ -71,13 +72,12 @@ const updateUser = async (req, res) => {
       res.status(200).send({ name, about });
     });
   } catch (err) {
-    console.log(err.name);
     if (err.name === 'ValidationError') {
       res.status(400).send({
         message: 'Переданы некорректные данные при обновлении профиля',
       });
       return;
-    } else if (err.name === 'CastError') {
+    } else if (err.message && ~err.message.indexOf('Cast to ObjectId failed for value')) {
       res.status(404).send({
         message: 'Пользователь с указанным _id не найден',
       });
@@ -102,8 +102,7 @@ const updateAvatar = async (req, res) => {
         message: 'Переданы некорректные данные при обновлении профиля',
       });
       return;
-    } else if (err.name === 'CastError') {
-      console.log(err.name);
+    } else if (err.message && ~err.message.indexOf('Cast to ObjectId failed for value')) {
       res.status(404).send({
         message: 'Пользователь с указанным _id не найден',
       });

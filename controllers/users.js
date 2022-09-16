@@ -64,22 +64,20 @@ const createUser = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const { name, about } = req.body;
-    if (name.length < 2 || name.length > 30 || about.length < 2 || about.length > 30) {
+    await User.findByIdAndUpdate(req.user._id, {
+      name,
+      about,
+    }, { new: true, runValidators: true }).then(() => {
+      res.status(200).send({ name, about });
+    });
+  } catch (err) {
+    console.log(err.name);
+    if (err.name === 'ValidationError') {
       res.status(400).send({
         message: 'Переданы некорректные данные при обновлении профиля',
       });
       return;
-    } else {
-      await User.findByIdAndUpdate(req.user._id, {
-        name,
-        about,
-      }).then(() => {
-        res.status(200).send({ name, about });
-      });
-    }
-  } catch (err) {
-    if (err.name === 'CastError') {
-      console.log(err.name);
+    } else if (err.name === 'CastError') {
       res.status(404).send({
         message: 'Пользователь с указанным _id не найден',
       });

@@ -24,11 +24,7 @@ app.use((req, res, next) => {
 
 app.use(userRouter);
 app.use(cardRouter);
-app.get('*', absentisPage);
-app.put('*', absentisPage);
-app.post('*', absentisPage);
-app.patch('*', absentisPage);
-app.delete('*', absentisPage);
+app.all('*', absentisPage);
 
 mongoose
   .connect('mongodb://localhost:27017/mestodb', {

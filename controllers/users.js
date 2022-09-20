@@ -69,9 +69,9 @@ const updateUser = async (req, res) => {
       name,
       about,
     }, { new: true, runValidators: true }).orFail()
-    .then(() => {
-      res.status(200).send({ name, about })
-    });
+      .then(() => {
+        res.status(200).send({ name, about });
+      });
   } catch (err) {
     console.log(err);
     if (err.name === 'CastError' || err.name === 'ValidationError') {
@@ -97,8 +97,9 @@ const updateAvatar = async (req, res) => {
     await User.findByIdAndUpdate(req.user._id, {
       avatar,
     }).orFail()
-    .then(() => { res.status(200).json({ avatar })
-  });
+      .then(() => {
+        res.status(200).json({ avatar });
+      });
   } catch (err) {
     if (err.name === 'CastError' || err.name === 'ValidationError') {
       res.status(400).send({

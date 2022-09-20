@@ -5,6 +5,7 @@
     "no-console": "off",
     "no-else-return": "off",
     "no-useless-return": "off",
-    "no-bitwise": "off"
+    "no-bitwise": "off",
+    "linebreak-style": "off"
   }
 }

@@ -68,16 +68,18 @@ const updateUser = async (req, res) => {
     await User.findByIdAndUpdate(req.user._id, {
       name,
       about,
-    }, { new: true, runValidators: true }).then(() => {
-      res.status(200).send({ name, about });
+    }, { new: true, runValidators: true }).orFail()
+    .then(() => {
+      res.status(200).send({ name, about })
     });
   } catch (err) {
-    if (err.name === 'ValidationError') {
+    console.log(err);
+    if (err.name === 'CastError' || err.name === 'ValidationError') {
       res.status(400).send({
         message: 'Переданы некорректные данные при обновлении профиля',
       });
       return;
-    } else if (err.message && ~err.message.indexOf('Cast to ObjectId failed for value')) {
+    } else if (err.name === 'DocumentNotFoundError') {
       res.status(404).send({
         message: 'Пользователь с указанным _id не найден',
       });
@@ -94,15 +96,16 @@ const updateAvatar = async (req, res) => {
     const { avatar } = req.body;
     await User.findByIdAndUpdate(req.user._id, {
       avatar,
-    });
-    res.status(200).json({ avatar });
+    }).orFail()
+    .then(() => { res.status(200).json({ avatar })
+  });
   } catch (err) {
-    if (err.name === 'ValidationError') {
+    if (err.name === 'CastError' || err.name === 'ValidationError') {
       res.status(400).send({
         message: 'Переданы некорректные данные при обновлении профиля',
       });
       return;
-    } else if (err.message && ~err.message.indexOf('Cast to ObjectId failed for value')) {
+    } else if (err.name === 'DocumentNotFoundError') {
       res.status(404).send({
         message: 'Пользователь с указанным _id не найден',
       });

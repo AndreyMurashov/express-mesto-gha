@@ -1,112 +1,112 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const validator = require('validator');
 const User = require('../models/user');
+const NotFoundError = require('../errors/NotFoundError');
+const BadRequestError = require('../errors/BadRequestError');
+const DefaultError = require('../errors/DefaultError');
+const AuthorizationError = require('../errors/AuthorizationError');
 
 // возвращает всех пользователей
-const getUsers = async (req, res) => {
+const getUsers = async (req, res, next) => {
   try {
     const data = await User.find({});
     res.status(200).json({ data });
   } catch (err) {
-    res.status(500).send({
-      message: 'Ошибка по умолчанию',
-    });
+    next(new DefaultError('На сервере произошла ошибка'));
   }
 };
 
 // возвращает пользователя по _id
-const getOneUser = async (req, res) => {
-  try {
-    const data = await User.findById(req.params.userId);
-    if (!data) {
-      res.status(404).send({
-        message: 'Пользователь не найден',
-      });
-      return;
-    } else {
-      const {
-        name, about, avatar, _id,
-      } = data;
-      res.status(200).json({
-        name, about, avatar, _id,
-      });
-    }
-  } catch (err) {
-    if (err.name === 'CastError') {
-      res.status(400).send({
-        message: 'Ошибочный запрос',
-      });
-      return;
-    } else {
-      res.status(500).send({ message: 'Ошибка по умолчанию' });
-    }
-  }
+const getOneUser = async (req, res, next) => {
+  const data = await User.findById(req.params.userId)
+    .then((data) => {
+      if (!data) {
+        next(new NotFoundError('Нет пользователя с таким ID'));
+      } else {
+        const {
+          name, about, avatar, _id,
+        } = data;
+        res.status(200).json({
+          name, about, avatar, _id,
+        });
+      }
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new BadRequestError('Ошибочный запрос'));
+      } else {
+        next(new DefaultError('На сервере произошла ошибка'));
+      }
+      next(err);
+    });
 };
 
 // возвращает текущего пользователя
-const getCurrentUser = async (req, res) => {
-  try {
-    const data = await User.findById(req.params.user);
-    if (!data) {
-      res.status(404).send({
-        message: 'Пользователь не найден',
-      });
-      return;
-    } else {
-      const {
-        name, about, avatar, _id,
-      } = data;
-      res.status(200).json({
-        name, about, avatar, _id,
-      });
-    }
-  } catch (err) {
-    if (err.name === 'CastError') {
-      res.status(400).send({
-        message: 'Ошибочный запрос',
-      });
-      return;
-    } else {
-      res.status(500).send({ message: 'Ошибка по умолчанию' });
-    }
-  }
+const getCurrentUser = (req, res, next) => {
+  const data = User.findById(req.user._id)
+    .then((data) => {
+      if (!data) {
+        next(new NotFoundError('Пользователь не найден'));
+      } else {
+        const {
+          name, about, avatar, _id,
+        } = data;
+        res.status(200).json({
+          name, about, avatar, _id,
+        });
+      }
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new BadRequestError('Ошибочный запрос'));
+      } else {
+        throw new DefaultError('На сервере произошла ошибка');
+      }
+      next(err);
+    });
 };
 
 // создаёт пользователя
-const createUser = (req, res) => {
-  try {
-    bcrypt.hash(req.body.password, 10)
-      .then((hash) => {
-        const {
-          name, about, avatar, email,
-        } = req.body;
-        const data = User.create(
-          {
-            name, about, avatar, email, password: hash,
-          },
-        );
-        // })
-        // .then((data) => {
-        const { _id } = data;
-        res.status(200).json({
-          name, about, avatar, email, _id,
-        });
-      });
-  } catch (err) {
-    if (err.name === 'ValidationError') {
-      res.status(400).send({
-        message: 'Переданы некорректные данные при создании пользователя',
-      });
-      return;
-    }
-    res.status(500).send({ message: 'Ошибка по умолчанию' });
+const createUser = (req, res, next) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    next(new BadRequestError('Неправильный логин или пароль.'));
   }
+  return bcrypt.hash(password, 10)
+    .then((hash) => User.create({
+      email,
+      password: hash,
+      name: req.body.name,
+      about: req.body.about,
+      avatar: req.body.avatar,
+    }))
+    .then((user) => res.status(200).send({
+      name: user.name,
+      about: user.about,
+      avatar: user.avatar,
+      _id: user._id,
+      email: user.email,
+    }))
+    .catch((err) => {
+      if (err.code === 11000) {
+        next(new AuthorizationError(`Пользователь с адресом электронной почты ${email} уже существует.`));
+      }
+      if (err.name === 'ValidationError') {
+        next(new BadRequestError('Переданы некорректные данные при создании пользователя'));
+      }
+      return next(err);
+    });
 };
 
 // обновляет профиль
-const updateUser = async (req, res) => {
+const updateUser = async (req, res, next) => {
   try {
     const { name, about } = req.body;
+    if (!name || !about) {
+      next(new BadRequestError('Неверный запрос.'));
+    }
     await User.findByIdAndUpdate(req.user._id, {
       name,
       about,
@@ -117,59 +117,57 @@ const updateUser = async (req, res) => {
   } catch (err) {
     console.log(err);
     if (err.name === 'CastError' || err.name === 'ValidationError') {
-      res.status(400).send({
-        message: 'Переданы некорректные данные при обновлении профиля',
-      });
-      return;
+      next(new BadRequestError('Переданы некорректные данные при обновлении профиля'));
     } else if (err.name === 'DocumentNotFoundError') {
-      res.status(404).send({
-        message: 'Пользователь с указанным _id не найден',
-      });
-      return;
+      next(new NotFoundError('Пользователь с указанным _id не найден'));
     } else {
-      res.status(400).send({ message: 'Ошибка по умолчанию' });
+      next(new DefaultError('На сервере произошла ошибка'));
     }
   }
 };
 
 // обновляет аватар
-const updateAvatar = async (req, res) => {
+const updateAvatar = async (req, res, next) => {
   try {
     const { avatar } = req.body;
+    if (!avatar) {
+      next(new BadRequestError('Неверный запрос.'));
+    }
     await User.findByIdAndUpdate(req.user._id, {
       avatar,
-    }).orFail()
+    }, { new: true, runValidators: true })
+      .orFail()
       .then(() => {
         res.status(200).json({ avatar });
       });
   } catch (err) {
     if (err.name === 'CastError' || err.name === 'ValidationError') {
-      res.status(400).send({
-        message: 'Переданы некорректные данные при обновлении профиля',
-      });
-      return;
+      next(new BadRequestError('Переданы некорректные данные при обновлении профиля'));
     } else if (err.name === 'DocumentNotFoundError') {
-      res.status(404).send({
-        message: 'Пользователь с указанным _id не найден',
-      });
-      return;
+      next(new NotFoundError('Пользователь с указанным _id не найден'));
     } else {
-      res.status(500).send({ message: 'Ошибка по умолчанию' });
+      next(new DefaultError('На сервере произошла ошибка'));
     }
   }
 };
 
 // авторизация пользователя
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
-
-  User.findUserByCredentials({ email, password })
+  if (!email || !password) {
+    return next(new BadRequestError('Неверный запрос.'));
+  }
+  console.log(email, password);
+  if (!validator.isEmail(email)) {
+    next(new BadRequestError('Неправильный формат электронной почты.'));
+  }
+  return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
+      const token = jwt.sign({ _id: '632db17edc0ddb588b0f9075' }, 'some-secret-key', { expiresIn: '7d' });
       res.send({ token });
     })
     .catch((err) => {
-      res.status(401).send({ message: err.message });
+      next(new AuthorizationError('Необходима авторизация'));
     });
 };
 

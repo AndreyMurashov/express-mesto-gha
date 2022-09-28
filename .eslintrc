@@ -6,6 +6,11 @@
     "no-else-return": "off",
     "no-useless-return": "off",
     "no-bitwise": "off",
-    "linebreak-style": "off"
+    "linebreak-style": "off",
+    "no-unused-vars":"off",
+    "no-shadow":"off",
+    "no-useless-escape":"off",
+    "func-names":"off",
+    "object-shorthand":"off"
   }
 }

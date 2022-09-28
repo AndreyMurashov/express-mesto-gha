@@ -6,12 +6,18 @@ const NotFoundError = require('../errors/NotFoundError');
 const BadRequestError = require('../errors/BadRequestError');
 const DefaultError = require('../errors/DefaultError');
 const AuthorizationError = require('../errors/AuthorizationError');
+const LoginError = require('../errors/LoginError');
 
 // возвращает всех пользователей
 const getUsers = async (req, res, next) => {
   try {
     const data = await User.find({});
-    res.status(200).json({ data });
+    const {
+      name, about, avatar, password,
+    } = data;
+    res.status(200).json({
+      name, about, avatar, password,
+    });
   } catch (err) {
     next(new DefaultError('На сервере произошла ошибка'));
   }
@@ -25,10 +31,10 @@ const getOneUser = async (req, res, next) => {
         next(new NotFoundError('Нет пользователя с таким ID'));
       } else {
         const {
-          name, about, avatar, _id,
+          name, about, avatar, password,
         } = data;
         res.status(200).json({
-          name, about, avatar, _id,
+          name, about, avatar, password,
         });
       }
     })
@@ -50,10 +56,10 @@ const getCurrentUser = (req, res, next) => {
         next(new NotFoundError('Пользователь не найден'));
       } else {
         const {
-          name, about, avatar, _id,
+          name, about, avatar, _id, password,
         } = data;
         res.status(200).json({
-          name, about, avatar, _id,
+          name, about, avatar, _id, password,
         });
       }
     })
@@ -163,11 +169,11 @@ const login = (req, res, next) => {
   }
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: '632db17edc0ddb588b0f9075' }, 'some-secret-key', { expiresIn: '7d' });
+      const token = jwt.sign({ _id: '633451f7c181427a4da91183' }, 'some-secret-key', { expiresIn: '7d' });
       res.send({ token });
     })
     .catch((err) => {
-      next(new AuthorizationError('Необходима авторизация'));
+      next(new LoginError('Необходима авторизация'));
     });
 };
 

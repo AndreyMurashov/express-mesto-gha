@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const { celebrate, Joi, errors } = require('celebrate');
 
 const userRouter = require('./routes/users');
 const { login, createUser } = require('./controllers/users');
@@ -7,7 +8,7 @@ const cardRouter = require('./routes/cards');
 const DefaultError = require('./errors/DefaultError');
 const NotFoundError = require('./errors/NotFoundError');
 
-const auth = require('./midlewares/auth');
+// const auth = require('./midlewares/auth');
 
 const app = express();
 const { PORT = 3000 } = process.env;
@@ -18,12 +19,27 @@ const absentisPage = (req, res, next) => {
 
 app.use(express.json());
 
-app.post('/signup', createUser);
-app.post('/signin', login);
-app.use(auth);
+app.post('/signup', celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().min(2).max(30),
+    about: Joi.string().min(2).max(30),
+    avatar: Joi.string().uri(),
+    email: Joi.string().required().email(),
+    password: Joi.string().required().min(8),
+  }),
+}), createUser);
+app.post('/signin', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().required().email(),
+    password: Joi.string().required().min(8),
+  }),
+}), login);
+// app.use(auth);
 app.use(userRouter);
 app.use(cardRouter);
 app.all('*', absentisPage);
+
+app.use(errors());
 
 app.use((err, req, res, next) => {
   const { statusCode, message } = err;

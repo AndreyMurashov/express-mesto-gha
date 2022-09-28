@@ -20,7 +20,7 @@ app.use(express.json());
 
 app.post('/signup', createUser);
 app.post('/signin', login);
-// app.use(auth);
+app.use(auth);
 app.use(userRouter);
 app.use(cardRouter);
 app.all('*', absentisPage);

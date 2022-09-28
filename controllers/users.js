@@ -13,10 +13,10 @@ const getUsers = async (req, res, next) => {
   try {
     const data = await User.find({});
     const {
-      name, about, avatar, password,
+      name, about, avatar,
     } = data;
     res.status(200).json({
-      name, about, avatar, password,
+      name, about, avatar,
     });
   } catch (err) {
     next(new DefaultError('На сервере произошла ошибка'));
@@ -31,10 +31,10 @@ const getOneUser = async (req, res, next) => {
         next(new NotFoundError('Нет пользователя с таким ID'));
       } else {
         const {
-          name, about, avatar, password,
+          name, about, avatar,
         } = data;
         res.status(200).json({
-          name, about, avatar, password,
+          name, about, avatar,
         });
       }
     })
@@ -50,7 +50,7 @@ const getOneUser = async (req, res, next) => {
 
 // возвращает текущего пользователя
 const getCurrentUser = (req, res, next) => {
-  const data = User.findById(req.user._id)
+  const data = User.findById({ _id: '633451f7c181427a4da91183' })
     .then((data) => {
       if (!data) {
         next(new NotFoundError('Пользователь не найден'));
@@ -67,9 +67,8 @@ const getCurrentUser = (req, res, next) => {
       if (err.name === 'CastError') {
         next(new BadRequestError('Ошибочный запрос'));
       } else {
-        throw new DefaultError('На сервере произошла ошибка');
+        next(new DefaultError('На сервере произошла ошибка'));
       }
-      next(err);
     });
 };
 

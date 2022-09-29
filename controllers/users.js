@@ -7,6 +7,7 @@ const BadRequestError = require('../errors/BadRequestError');
 const DefaultError = require('../errors/DefaultError');
 const AuthorizationError = require('../errors/AuthorizationError');
 const LoginError = require('../errors/LoginError');
+const user = require('../models/user');
 
 // возвращает всех пользователей
 const getUsers = async (req, res, next) => {
@@ -50,7 +51,7 @@ const getOneUser = async (req, res, next) => {
 
 // возвращает текущего пользователя
 const getCurrentUser = (req, res, next) => {
-  const data = User.findById({ _id: '633451f7c181427a4da91183' })
+  const data = User.findById({ _id: user._id })
     .then((data) => {
       if (!data) {
         next(new NotFoundError('Пользователь не найден'));

@@ -10,7 +10,7 @@ cardRouter.post('/cards', celebrate({
     link: Joi.string().required(),
   }),
 }), cardController.createCard);
-cardRouter.delete('/cards/:cardId', auth, cardController.removeCard);
+cardRouter.delete('/cards/:cardId', cardController.removeCard);
 cardRouter.put('/cards/:cardId/likes', cardController.likeCard);
 cardRouter.delete('/cards/:cardId/likes', cardController.dislikeCard);
 

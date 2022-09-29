@@ -8,7 +8,7 @@ userRouter.get('/users/me', userController.getCurrentUser);
 userRouter.get('/users/:userId', celebrate({
   body: Joi.object().keys({
     _id: Joi.string().min(24).max(24),
-}),
+  }),
 }), userController.getOneUser);
 userRouter.patch('/users/me', celebrate({
   body: Joi.object().keys({

@@ -10,18 +10,14 @@ const LoginError = require('../errors/LoginError');
 const user = require('../models/user');
 
 // возвращает всех пользователей
-const getUsers = async (req, res, next) => {
-  try {
-    const data = await User.find({});
-    const {
-      name, about, avatar,
-    } = data;
-    res.status(200).json({
-      name, about, avatar,
-    });
-  } catch (err) {
-    next(new DefaultError('На сервере произошла ошибка'));
-  }
+const getUsers = (req, res, next) => {
+  User.find({})
+    .then((data) => {
+      res.status(200).json(data);
+    })
+    .catch((err) => {
+      next(new DefaultError('На сервере произошла ошибка'));
+ });
 };
 
 // возвращает пользователя по _id
@@ -31,12 +27,10 @@ const getOneUser = async (req, res, next) => {
       if (!data) {
         next(new NotFoundError('Нет пользователя с таким ID'));
       } else {
-        const {
-          name, about, avatar,
-        } = data;
-        res.status(200).json({
-          name, about, avatar,
-        });
+        // const {
+        //   name, about, avatar,
+        // } = data;
+        res.status(200).json(data);
       }
     })
     .catch((err) => {
@@ -51,17 +45,16 @@ const getOneUser = async (req, res, next) => {
 
 // возвращает текущего пользователя
 const getCurrentUser = (req, res, next) => {
-  const data = User.findById({ _id: user._id })
+  const { _id } = req.user;
+  const data = User.findById({_id })
     .then((data) => {
       if (!data) {
         next(new NotFoundError('Пользователь не найден'));
       } else {
-        const {
-          name, about, avatar, _id, password,
-        } = data;
-        res.status(200).json({
-          name, about, avatar, _id, password,
-        });
+        // const {
+        //   name, about, avatar, _id, password,
+        // } = data;
+        res.status(200).json(data);
       }
     })
     .catch((err) => {

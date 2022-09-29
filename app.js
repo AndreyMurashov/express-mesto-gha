@@ -19,12 +19,12 @@ const absentisPage = (req, res, next) => {
 
 app.use(express.json());
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '6335450c00a3fd38854c3fc8',
-  };
-  next();
-});
+// app.use((req, res, next) => {
+//   req.user = {
+//     _id: '6335450c00a3fd38854c3fc8',
+//   };
+//   next();
+// });
 
 app.post('/signup', celebrate({
   body: Joi.object().keys({

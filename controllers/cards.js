@@ -38,9 +38,9 @@ module.exports.createCard = async (req, res, next) => {
 };
 
 // удаляет карточку по идентификатору
-module.exports.removeCard = async (req, res, next) => {
-  try {
-    await Card.findById(req.params.cardId).orFail(() => {})
+module.exports.removeCard = (req, res, next) => {
+
+    Card.findById(req.params.cardId).orFail(() => {})
       .then((card) => {
         if (!card) {
           next(new NotFoundError('Запрашиваемый ресурс не найден'));
@@ -53,17 +53,18 @@ module.exports.removeCard = async (req, res, next) => {
         } else {
           next(new ForbiddenError('Нельзя удалять чужие карточки'));
         }
-      });
-  } catch (err) {
+      })
+ .catch((err) => {
     console.log(err.name);
     if (err.name === 'CastError') {
       next(new BadRequestError('Переданы некорректные данные'));
-    } else if (err.name === 'DocumentNotFoundError') {
+    } else
+    if (err.name === 'DocumentNotFoundError') {
       next(new NotFoundError('Карточка с указанным _id не найдена'));
     } else {
       next(new DefaultError('На сервере произошла ошибка'));
     }
-  }
+  })
 };
 
 // поставить лайк карточке

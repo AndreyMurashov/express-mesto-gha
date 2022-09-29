@@ -3,11 +3,13 @@ const { celebrate, Joi } = require('celebrate');
 const userController = require('../controllers/users');
 const auth = require('../midlewares/auth');
 
+// const JoiObjectId = Joi.string().regex(/^[0-9a-fA-F]{24}$/);
+
 userRouter.get('/users', userController.getUsers);
 userRouter.get('/users/me', userController.getCurrentUser);
 userRouter.get('/users/:userId', celebrate({
-  body: Joi.object().keys({
-    _id: Joi.string().min(24).max(24),
+  params: Joi.object().keys({
+    userId: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
   }),
 }), userController.getOneUser);
 userRouter.patch('/users/me', celebrate({
@@ -18,7 +20,7 @@ userRouter.patch('/users/me', celebrate({
 }), userController.updateUser);
 userRouter.patch('/users/me/avatar', celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string().domain(),
+    avatar: Joi.string().regex(/((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/),
   }),
 }), userController.updateAvatar);
 

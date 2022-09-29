@@ -150,16 +150,13 @@ const updateAvatar = async (req, res, next) => {
 // авторизация пользователя
 const login = (req, res, next) => {
   const { email, password } = req.body;
-  if (!email || !password) {
-    return next(new BadRequestError('Неверный запрос.'));
-  }
   console.log(email, password);
   if (!validator.isEmail(email)) {
     next(new BadRequestError('Неправильный формат электронной почты.'));
   }
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
+      const token = jwt.sign({ _id: 'd285e3dceed844f902650f40' }, 'some-secret-key', { expiresIn: '7d' });
       res.send({ token });
     })
     .catch((err) => {

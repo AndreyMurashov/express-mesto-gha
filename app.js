@@ -8,8 +8,6 @@ const cardRouter = require('./routes/cards');
 const DefaultError = require('./errors/DefaultError');
 const NotFoundError = require('./errors/NotFoundError');
 
-// const auth = require('./midlewares/auth');
-
 const app = express();
 const { PORT = 3000 } = process.env;
 
@@ -41,7 +39,6 @@ app.post('/signin', celebrate({
     password: Joi.string().required().min(8),
   }),
 }), login);
-// app.use(auth);
 app.use(userRouter);
 app.use(cardRouter);
 app.all('*', absentisPage);
@@ -50,9 +47,6 @@ app.use(errors());
 
 app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
-  // if (!statusCode) {
-  //   throw new DefaultError('На сервере произошла ошибка');
-  // }
   res.status(statusCode).send({ message: statusCode === 500 ? 'На сервере произошла ошибка' : message });
 });
 

@@ -51,9 +51,6 @@ const getCurrentUser = (req, res, next) => {
       if (!data) {
         next(new NotFoundError('Пользователь не найден'));
       } else {
-        // const {
-        //   name, about, avatar, _id, password,
-        // } = data;
         res.status(200).json(data);
       }
     })

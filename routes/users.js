@@ -3,9 +3,7 @@ const { celebrate, Joi } = require('celebrate');
 const userController = require('../controllers/users');
 const auth = require('../midlewares/auth');
 
-// const JoiObjectId = Joi.string().regex(/^[0-9a-fA-F]{24}$/);
-
-userRouter.get('/users', userController.getUsers);
+userRouter.get('/users', auth, userController.getUsers);
 userRouter.get('/users/me', userController.getCurrentUser);
 userRouter.get('/users/:userId', celebrate({
   params: Joi.object().keys({

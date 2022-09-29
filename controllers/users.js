@@ -76,9 +76,9 @@ const getCurrentUser = (req, res, next) => {
 const createUser = (req, res, next) => {
   const { email, password } = req.body;
 
-  if (!email || !password) {
-    next(new BadRequestError('Неправильный логин или пароль.'));
-  }
+  // if (!email || !password) {
+  //   next(new BadRequestError('Неправильный логин или пароль.'));
+  // }
   return bcrypt.hash(password, 10)
     .then((hash) => User.create({
       email,

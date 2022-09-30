@@ -18,9 +18,6 @@ module.exports.getCards = async (req, res, next) => {
 module.exports.createCard = async (req, res, next) => {
   try {
     const { name, link } = req.body;
-    if (!name || !link) {
-      next(new BadRequestError('Неверный запрос.'));
-    }
     const owner = req.user._id;
     const data = await Card.create({ name, link, owner });
     const { likes, _id, createdAt } = data;

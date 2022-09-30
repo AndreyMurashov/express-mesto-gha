@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const { celebrate, Joi, errors } = require('celebrate');
-
+const auth = require('./midlewares/auth');
 const userRouter = require('./routes/users');
 const { login, createUser } = require('./controllers/users');
 const cardRouter = require('./routes/cards');
@@ -32,6 +32,7 @@ app.post('/signin', celebrate({
     password: Joi.string().required().min(8),
   }),
 }), login);
+app.use(auth);
 app.use(userRouter);
 app.use(cardRouter);
 app.all('*', absentisPage);

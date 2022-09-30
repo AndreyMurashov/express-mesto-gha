@@ -17,7 +17,7 @@ const getUsers = (req, res, next) => {
     })
     .catch((err) => {
       next(new DefaultError('На сервере произошла ошибка'));
- });
+    });
 };
 
 // возвращает пользователя по _id
@@ -27,9 +27,6 @@ const getOneUser = async (req, res, next) => {
       if (!data) {
         next(new NotFoundError('Нет пользователя с таким ID'));
       } else {
-        // const {
-        //   name, about, avatar,
-        // } = data;
         res.status(200).json(data);
       }
     })
@@ -46,12 +43,12 @@ const getOneUser = async (req, res, next) => {
 // возвращает текущего пользователя
 const getCurrentUser = (req, res, next) => {
   const { _id } = req.user;
-  const data = User.findById({_id })
-    .then((data) => {
-      if (!data) {
+  User.findById({ _id })
+    .then((user) => {
+      if (!user) {
         next(new NotFoundError('Пользователь не найден'));
       } else {
-        res.status(200).json(data);
+        res.status(200).json(user);
       }
     })
     .catch((err) => {
@@ -66,11 +63,7 @@ const getCurrentUser = (req, res, next) => {
 // создаёт пользователя
 const createUser = (req, res, next) => {
   const { email, password } = req.body;
-
-  // if (!email || !password) {
-  //   next(new BadRequestError('Неправильный логин или пароль.'));
-  // }
-  return bcrypt.hash(password, 10)
+  bcrypt.hash(password, 10)
     .then((hash) => User.create({
       email,
       password: hash,
@@ -111,7 +104,6 @@ const updateUser = async (req, res, next) => {
         res.status(200).send({ name, about });
       });
   } catch (err) {
-    console.log(err);
     if (err.name === 'CastError' || err.name === 'ValidationError') {
       next(new BadRequestError('Переданы некорректные данные при обновлении профиля'));
     } else if (err.name === 'DocumentNotFoundError') {
@@ -150,13 +142,12 @@ const updateAvatar = async (req, res, next) => {
 // авторизация пользователя
 const login = (req, res, next) => {
   const { email, password } = req.body;
-  console.log(email, password);
   if (!validator.isEmail(email)) {
     next(new BadRequestError('Неправильный формат электронной почты.'));
   }
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: 'd285e3dceed844f902650f40' }, 'some-secret-key', { expiresIn: '7d' });
+      const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
       res.send({ token });
     })
     .catch((err) => {

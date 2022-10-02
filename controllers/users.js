@@ -13,7 +13,7 @@ const user = require('../models/user');
 const getUsers = (req, res, next) => {
   User.find({})
     .then((data) => {
-      res.status(200).json(data);
+      res.json(data);
     })
     .catch((err) => {
       next(new DefaultError('На сервере произошла ошибка'));
@@ -36,7 +36,6 @@ const getOneUser = async (req, res, next) => {
       } else {
         next(new DefaultError('На сервере произошла ошибка'));
       }
-      next(err);
     });
 };
 
@@ -80,7 +79,7 @@ const createUser = (req, res, next) => {
     }))
     .catch((err) => {
       if (err.code === 11000) {
-        next(new AuthorizationError(`Пользователь с адресом электронной почты ${email} уже существует.`));
+        return next(new AuthorizationError(`Пользователь с адресом электронной почты ${email} уже существует.`));
       }
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные при создании пользователя'));
@@ -93,21 +92,16 @@ const createUser = (req, res, next) => {
 const updateUser = async (req, res, next) => {
   try {
     const { name, about } = req.body;
-    if (!name || !about) {
-      next(new BadRequestError('Неверный запрос.'));
-    }
     await User.findByIdAndUpdate(req.user._id, {
       name,
       about,
-    }, { new: true, runValidators: true }).orFail()
+    }, { new: true, runValidators: true }).orFail(() => new NotFoundError('Пользователь с указанным id не существует'))
       .then(() => {
         res.status(200).send({ name, about });
       });
   } catch (err) {
     if (err.name === 'CastError' || err.name === 'ValidationError') {
       next(new BadRequestError('Переданы некорректные данные при обновлении профиля'));
-    } else if (err.name === 'DocumentNotFoundError') {
-      next(new NotFoundError('Пользователь с указанным _id не найден'));
     } else {
       next(new DefaultError('На сервере произошла ошибка'));
     }
@@ -118,21 +112,16 @@ const updateUser = async (req, res, next) => {
 const updateAvatar = async (req, res, next) => {
   try {
     const { avatar } = req.body;
-    if (!avatar) {
-      next(new BadRequestError('Неверный запрос.'));
-    }
     await User.findByIdAndUpdate(req.user._id, {
       avatar,
     }, { new: true, runValidators: true })
-      .orFail()
+      .orFail(() => new NotFoundError('Пользователь с указанным id не существует'))
       .then(() => {
         res.status(200).json({ avatar });
       });
   } catch (err) {
     if (err.name === 'CastError' || err.name === 'ValidationError') {
       next(new BadRequestError('Переданы некорректные данные при обновлении профиля'));
-    } else if (err.name === 'DocumentNotFoundError') {
-      next(new NotFoundError('Пользователь с указанным _id не найден'));
     } else {
       next(new DefaultError('На сервере произошла ошибка'));
     }
@@ -142,9 +131,6 @@ const updateAvatar = async (req, res, next) => {
 // авторизация пользователя
 const login = (req, res, next) => {
   const { email, password } = req.body;
-  if (!validator.isEmail(email)) {
-    next(new BadRequestError('Неправильный формат электронной почты.'));
-  }
   return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });

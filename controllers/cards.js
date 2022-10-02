@@ -39,10 +39,10 @@ module.exports.removeCard = (req, res, next) => {
   Card.findById(req.params.cardId).orFail(() => {})
     .then((card) => {
       if (!card) {
-        next(new NotFoundError('Запрашиваемый ресурс не найден'));
+        return next(new NotFoundError('Запрашиваемый ресурс не найден'));
       }
       if (req.user._id === card.owner.toString()) {
-        Card.deleteOne(card)
+        return Card.deleteOne(card)
           .then(() => {
             res.status(200).send({ message: 'Карточка удалена' });
           });
